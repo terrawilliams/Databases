@@ -41,7 +41,7 @@ create table tblItemType
     CategoryDescription varchar(50),
 );
 
-create table tblItem
+create table TblItem
 (
     ItemID          char(6)         primary key,
     Description     varchar(300),
@@ -49,13 +49,52 @@ create table tblItem
     TypeID          int             references tblItemType(TypeID)
 );
 
-create table tblOrderLine
+create table TblOrderLine
 (
     OrderID         char(6)         references TblOrder(OrderID),
-    ItemID          char(6)         references tblItem(ItemID),
+    ItemID          char(6)         references TblItem(ItemID),
     Quantity        int             not null        check (Quantity > 0),
     Price           money           not null        check (Price > 0),
     AddressID       int             references TblShipAddress(AddressID),
     primary key (OrderID, ItemID)
 );
 
+create table TblItemLocation
+(
+    ItemID          char(6)         references TblItem(ItemID),
+    LocationID      char(2),
+    QtyOnHand       int,
+    primary key (ItemID, LocationID)
+);
+
+create table TblShipLine
+(
+    DateShipped     datetime,
+    OrderID         char(6),
+    ItemID          char(6),
+    LocationID      char(2),
+    QtyShipped      int             not null,
+    MethodShipped   varchar(30)     not null,
+    primary key (DateShipped, OrderID, ItemID, LocationID),
+    foreign key (OrderID, ItemID)       references TblOrderLine(OrderID, ItemID),
+    foreign key (ItemID, LocationID)    references TblItemLocation(ItemID, LocationID)
+);
+
+create table TblItemCostHistory
+(
+    HistoryID       int             primary key     identity(1,1),
+    ItemID          char(6)         references TblItem(ItemID),
+    LastCostDate    datetime        not null,
+    LastCost        money           not null
+);
+
+create table tblReview
+(
+    ReviewID        int             primary key     identity(1,1),
+    ReviewDate      datetime,
+    Rating          int             check (Rating in (1, 2, 3, 4, 5)),
+    ReviewText      varchar(500),
+    OrderID         char(6),
+    ItemID          char(6),
+    foreign key (OrderID, ItemID) references TblOrderLine(OrderID, ItemID)
+);
