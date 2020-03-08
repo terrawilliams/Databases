@@ -45,7 +45,7 @@ create table TblItem
 (
     ItemID          char(6)         primary key,
     Description     varchar(300),
-    ListPrice       money           not null        check (ListPrice <= 5),
+    ListPrice       money           not null        check (ListPrice >= 5),
     TypeID          int             references tblItemType(TypeID)
 );
 
