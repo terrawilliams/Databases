@@ -1,0 +1,48 @@
+insert into TblCustomer values
+('00405', 'Barrington',     'Margaret',     '1765 Roundtree Pkwy',      'reno',         'nv', '89509-1454', 'USA',  '2008-07-12 00:00:00', 'barry@hotmail.com',     '7757464561', 'P', null),
+('08892', 'Medina',         'Teresa',       'P.O.Box 5661',             'san jose',     'ca', '98123',      'USA',  '2001-04-01 00:00:00', 'twillbeth@ygmail.com',  '8098291838', 'P', null),
+('12006', 'Martinez',       'Guadalupe',    '223 North Pinetree Drive', 'Reno',         'NV', '89511',      null,   '2018-02-14 00:00:00', 'gmartinez@ccu.edu',     '7758837612', 'P', null),
+('21142', 'Candriller',     'Emily',        '2 Sedgeway',               'Laguna Beach', 'CA', '94567',      null,   '2019-12-11 00:00:00', 'kriller@mbu.edu',       '6198813929', 'P', null),
+('29188', 'Polanski',       'Tiffany',      '5778 Battlemount Ct.',     'RENO',         'NV', '89507',      null,   '2011-08-23 00:00:00', 'skipole@gmail.com',     '7757465771', 'P', null),
+('30192', 'Chen',           'Lian',         '2319 Crest Dr',            'REno',         'Nv', '89503-0113', null,   '1999-08-30 00:00:00', 'jester@here.com',       '7757218991', 'P', null),
+('38817', 'Okeke',          'Bud',          '1001 Catchway',            'Anaheim',      'CA', '95113',      null,   '2019-03-12 00:00:00', 'bud@cservices.com',     '8037718991', 'P', null),
+('39418', 'Agarwal',        'Sandeep',      '452 Anza Drive',           'San Diego',    'CA', '92125',      null,   '2020-02-02 00:00:00', 'agarwin@yahoo.com',     '8189929011', 'P', null),
+('78112', 'Guili',          'Mary Anne',    '4457 Meridith St',         'Irvine',       'CA', '97128',      null,   '2012-10-09 00:00:00', 'ma@san.rr.com',         '6195621334', 'S', '12006'),
+('00625', 'Dao',            'Phong',        '341 West Park',            'Fresno',       'CA', '96137',      null,   '2019-09-02 00:00:00', 'daop@gmail.com',        '8582138982', 'P', '78112'),
+('06774', 'Phan',           'Sarah',        '44512 Sawbuck Path',       'SPARKS',       'nv', '89432',      'USA',  '2006-08-12 00:00:00', 'flipper@gmail.com',     '7753324636', 'S', '12006'),
+('07831', 'Rodriguez',      'Karen',        '4589 Marthiam',            'Chico',        'CA', '97111',      null,   '2010-11-06 00:00:00', 'rodriguez@aol.com',     '8193821828', 'P', '00405'),
+('12001', 'Cranston',       'Brittany',     '12 Sandstone',             'Sparks',       'NV', '89431',      null,   '2017-04-12 00:00:00', 'britters@ccb.com',      '7753312199', 'S', '12006'),
+('32019', 'Stein',          'Martin',       '10 South Wilders',         'reno',         'nv', '89503-8912', 'USA',  '2020-02-12 00:00:00', 'mmm@hard.com',          '7753314838', 'P', '21142'),
+('21143', 'Gutierrez',      'Yolanda',      '2341 Bramble Bush Drive',  'Sparks',       'NV', '89431-0112', null,   '2019-05-06 00:00:00', 'jj@isp.all.com',        '7753317188', 'S', '32019'),
+('24221', 'Sassani',        'Mahsa',        '8891 Wedekind',            'Sparks',       'nV', '89426',      'USA',  '2020-01-15 00:00:00', 'mussiea@gmail.com',     '7752211233', 'P', '08892'),
+('32817', 'Foster-Madani',  'Mohsen',       '318 Western Ave',          'SAN diego',    'ca', '92381',      null,   '1999-08-15 00:00:00', 'fosterja@gmail.com',    '8583284483', 'P', '30192');
+
+insert into TblShipAddress values
+(10, 'Maricopa Vineyards',  '7834 West Oakway Avenue',  '92711',        'USA',              '4129807811'),
+(20, 'Jessica Riaz',        '35123 Caminito Corriente', '92120',        'USA',              '8584415660'),
+(30, 'Baselite Industries', '7834 West Oakway Avenue',  '92711',        'USA',              '4129807811'),
+(40, 'Jeremiah Blotsworth', '12 Spotting Dog',          'CV1 3LD',      'UK',               '440122489558'),
+(50, 'Christchurch Stanza', '2104 Akaroa Road',         'CHR 7672',     'NZ',               '6409849380692'),
+(60, 'Michael Lee',         '4778 Scofield Ct.',        '87764551',     'USA',              '2108967885'),
+(65, 'Nguyen Thi Hoa',      '16/2 Quang Trung Street',  'Tran Tru',     'Long Am 654321',   '289896788544'),
+(70, 'Ivan Smirnov',        '1500 15th Avenue',         '670128996',    'USA',              '8318892331'),
+(80, 'January Wang',        '891 Aston St.',            'B4 7DA',       'UK',               '44490943958'),
+(85, 'Esperanza Fernandez', 'Calle Aduana, 29',         '28010 Madrid', 'Spain',            '448395943958');
+
+insert into TblOrder values
+('123000',	'2020-02-02 00:00:00',	'A1',	'111',	'00405', null),
+('200335',	'2020-01-26 00:00:00',	null,	'111',	'07831', 20),
+('223344',	'2020-02-09 00:00:00',  null,	'231',	'21142', null),
+('300221',	'2020-01-26 00:00:00',	'03',	'231',	'07831', 20),
+('400001',	'2020-02-20 00:00:00',	'B3',   '111',	'32019', null),
+('421988',	'2020-03-05 00:00:00',	null,	'117',	'24221', null),
+('445511',	'2020-02-15 00:00:00',	'02',	'444',	'32019', null),
+('450137',	'2019-12-29 00:00:00',	null,	'444',	'07831', 10),
+('567123',	'2020-01-26 00:00:00',	null,	'444',	'07831', 10),
+('651222',	'2020-01-29 00:00:00',	null,	'111',	'12006', null),
+('671100',	'2020-02-19 00:00:00',	null,	'111',	'32019', 65),
+('675990',	'2019-12-28 00:00:00',	null,	'111',	'00625', 40),
+('781206',	'2020-02-15 00:00:00',	'06',	'231',	'38817', 85),
+('892211',	'2019-12-28 00:00:00',	null,	'111',	'00625', null),
+('980001',	'2020-01-22 00:00:00',	'04',	'444',	'78112', null),
+('983983',	'2020-02-19 00:00:00',	null,	'111',	'32019', 50);
