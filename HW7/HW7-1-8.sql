@@ -3,7 +3,7 @@ SELECT      FirstName + ' ' + LastName   Name,
             Phone,
             City,
             State,
-            CustomerAffID,
+            CustomerAffID                AffiliatedCustomer,
             FirstBuyDate
 FROM TblCustomer
 WHERE State = 'CA'
@@ -16,7 +16,7 @@ SELECT      LastName + ', ' + SUBSTRING(FirstName, 1, 1) + '.' Name,
                     SUBSTRING(Phone, 7, 4)  PhoneNumber,
             UPPER(City)                     City,
             UPPER(State)                    State,
-            CustomerAffID                   AffliatedCustomer,
+            CustomerAffID                   AffiliatedCustomer,
             CONVERT(varchar, FirstBuyDate, 107) FirstBuyDateOut
 FROM TblCustomer
 WHERE State = 'CA'
@@ -36,7 +36,7 @@ WHERE State = 'CA' and CustomerAffID IS NULL
 ORDER BY FirstBuyDate DESC;
 
 /* (4) */
-SELECT      OrderDate                                   'Date of Order',
+SELECT      CONVERT(VARCHAR, OrderDate, 101)            'Date of Order',
             OrderID                                     'Order Number',
             CustomerID                                  'Customer Number',
             CreditCode                                  'Credit Code',
@@ -61,7 +61,7 @@ SELECT      OrderID                         OrderNumber,
             CONVERT(DECIMAL(10,2), Price)   PricePaid,
             CONVERT(DECIMAL(10,2), (Price * Quantity))   ExtendedPrice
 FROM TblOrderLine
-WHERE (Price * Quantity) > 850
+WHERE (Price * Quantity) > 850;
 
 /* (7) */
 SELECT      OrderID                         OrderNumber,
@@ -93,4 +93,4 @@ SELECT      OrderID,
 FROM TblShipLine
 WHERE MONTH(DateShipped) = 1 and YEAR(DateShipped) = YEAR(GETDATE())
 GROUP BY OrderID, DateShipped, QtyShipped, ItemID, MethodShipped
-ORDER BY ItemID;
+ORDER BY OrderID, ItemID;
