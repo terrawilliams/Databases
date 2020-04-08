@@ -116,17 +116,20 @@ WHERE MONTH(OrderDate) = 2 AND YEAR(OrderDate) = YEAR(GETDATE())
 ORDER BY 1 DESC;
 
 /* #6 */
-SELECT      DISTINCT TblItem.ItemID                             ItemID,
-            Description                                         ItemDescription,
-            SUM(Quantity)                                       TotalQtySold,
+SELECT      DISTINCT TblItem.ItemID                                     ItemID,
+            Description                                                 ItemDescription,
+            SUM(Quantity)                                               TotalQtySold,
             (SELECT COUNT(*)
                     FROM TblOrderLine AS OrderLine
                     WHERE OrderLine.ItemID = TblItem.ItemID
-                    GROUP BY OrderLine.ItemID)                  CountOfOrderLines,
-            CONVERT(DECIMAL(10, 2), ListPrice)                  ListPrice,
-            CONVERT(DECIMAL(10, 2), (SELECT MIN(Price)))        MinimumPrice,
-            CONVERT(DECIMAL(10, 2), (SELECT MAX(Price)))        MaxPrice,
-            CONVERT(DECIMAL(10, 2), (SELECT AVG(Price)))        AvgPrice
+                    GROUP BY OrderLine.ItemID)                          CountOfOrderLines,
+            CONVERT(DECIMAL(10, 2), ListPrice)                          ListPrice,
+            CONVERT(DECIMAL(10, 2), (SELECT MIN(Price) FROM TblOrderLine
+                WHERE TblItem.ItemID = TblOrderLine.ItemID))            MinimumPrice,
+            CONVERT(DECIMAL(10, 2), (SELECT MAX(Price) FROM TblOrderLine
+                WHERE TblItem.ItemID = TblOrderLine.ItemID))            MaximumPrice,
+            CONVERT(DECIMAL(10, 2), (SELECT AVG(Price) FROM TblOrderLine
+                WHERE TblItem.ItemID = TblOrderLine.ItemID))            AveragePrice
 FROM TblItem
 INNER JOIN TblOrderLine TOL
 ON TblItem.ItemID = TOL.ItemID
@@ -134,17 +137,20 @@ GROUP BY TblItem.ItemID, Description, ListPrice
 ORDER BY TblItem.ItemID;
 
 /* #7 */
-SELECT      DISTINCT TblItem.ItemID                                 ItemID,
-            Description                                             ItemDescription,
-            ISNULL(SUM(Quantity), 0)                                TotalQtySold,
+SELECT      DISTINCT TblItem.ItemID                                             ItemID,
+            Description                                                         ItemDescription,
+            ISNULL(SUM(Quantity), 0)                                            TotalQtySold,
             ISNULL((SELECT COUNT(*)
                     FROM TblOrderLine AS OrderLine
                     WHERE OrderLine.ItemID = TblItem.ItemID
-                    GROUP BY OrderLine.ItemID), 0)                  CountOfOrderLines,
-            CONVERT(DECIMAL(10, 2), ListPrice)                      ListPrice,
-            CONVERT(DECIMAL(10, 2), ISNULL((SELECT MIN(Price)), 0)) MinimumPrice,
-            CONVERT(DECIMAL(10, 2), ISNULL((SELECT MAX(Price)), 0)) MaximumPrice,
-            CONVERT(DECIMAL(10, 2), ISNULL((SELECT AVG(Price)), 0)) AvgPrice
+                    GROUP BY OrderLine.ItemID), 0)                              CountOfOrderLines,
+            CONVERT(DECIMAL(10, 2), ListPrice)                                  ListPrice,
+            CONVERT(DECIMAL(10, 2), (ISNULL((SELECT MIN(Price) FROM TblOrderLine
+                WHERE TblItem.ItemID = TblOrderLine.ItemID), 0)))               MinimumPrice,
+            CONVERT(DECIMAL(10, 2), (ISNULL((SELECT MAX(Price) FROM TblOrderLine
+                WHERE TblItem.ItemID = TblOrderLine.ItemID), 0)))               MaximumPrice,
+            CONVERT(DECIMAL(10, 2), (ISNULL((SELECT AVG(Price) FROM TblOrderLine
+                WHERE TblItem.ItemID = TblOrderLine.ItemID), 0)))               AveragePrice
 FROM TblItem
 LEFT OUTER JOIN TblOrderLine TOL
 ON TblItem.ItemID = TOL.ItemID
