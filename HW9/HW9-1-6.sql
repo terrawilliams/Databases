@@ -285,34 +285,175 @@ SELECT ItemID,
 FROM TblItemLocation
 GROUP BY ItemID;
 
-CREATE VIEW LeftToShip AS
-SELECT TblOrderLine.ItemID,
-       SUM(Quantity) - SUM(QtyShipped) QuantityToShip
-FROM TblOrderLine
-INNER JOIN TblShipLine
-ON TblOrderLine.OrderID = TblShipLine.OrderID and TblOrderLine.ItemID = TblShipLine.ItemID
-WHERE TblOrderLine.OrderID IN
-    (SELECT *
-        FROM NotCompletelyShipped)
-GROUP BY TblOrderLine.ItemID;
-
-SELECT *
+CREATE VIEW OrderlineLeftToShip AS
+SELECT OrderID,
+       ItemID,
+       Quantity,
+       ISNULL((SELECT TotalShipped
+           FROM ShippedSummary
+           WHERE ShippedOrderID = OrderID
+           AND ShippedItemID = ItemID), 0) QuantityShipped,
+       CASE
+           WHEN Quantity -
+                    ISNULL((SELECT TotalShipped
+                        FROM ShippedSummary
+                        WHERE ShippedOrderID = OrderID
+                        AND ShippedItemID = ItemID), 0) < 0
+               THEN 0
+            ELSE Quantity -
+                    ISNULL((SELECT TotalShipped
+                        FROM ShippedSummary
+                        WHERE ShippedOrderID = OrderID
+                        AND ShippedItemID = ItemID), 0)
+        END QuantityToShip
 FROM TblOrderLine;
+
+CREATE VIEW ItemLeftToShip AS
+SELECT ItemID,
+       SUM(QuantityToShip) QuantityLeftToShip
+FROM OrderlineLeftToShip
+GROUP BY ItemID;
 
 SELECT ItemID,
        Description,
-       (SELECT QuantityToShip
-           FROM LeftToShip
-           WHERE LeftToShip.ItemID = items.ItemID) TotalLeftToShip,
+       ISNULL((SELECT QuantityLeftToShip
+           FROM ItemLeftToShip
+           WHERE ItemLeftToShip.ItemID = items.ItemID), 0) TotalLeftToShip,
        ISNULL((SELECT TotalQty
            FROM TotalQtyOnHand
-           WHERE TotalQtyOnHand.ItemID = items.ItemID), 0) TotalAvailableInInventory
-FROM TblItem items;
+           WHERE TotalQtyOnHand.ItemID = items.ItemID), 0) TotalAvailableInInventory,
+       ISNULL((SELECT QuantityLeftToShip
+           FROM ItemLeftToShip
+           WHERE ItemLeftToShip.ItemID = items.ItemID), 0) -
+            ISNULL((SELECT TotalQty
+               FROM TotalQtyOnHand
+               WHERE TotalQtyOnHand.ItemID = items.ItemID), 0) QuantityShort
+FROM TblItem items
+WHERE ISNULL((SELECT QuantityLeftToShip
+           FROM ItemLeftToShip
+           WHERE ItemLeftToShip.ItemID = items.ItemID), 0) -
+            ISNULL((SELECT TotalQty
+               FROM TotalQtyOnHand
+               WHERE TotalQtyOnHand.ItemID = items.ItemID), 0) > 0;
 
 /* 9 */
+CREATE VIEW OrderLineProfit AS
+SELECT OrderID,
+       orderLine.ItemID,
+       Price * Quantity TotalPrice,
+       Quantity *
+        (SELECT LastCost
+            FROM TblItemCostHistory costHistory
+            WHERE costHistory.ItemID = orderLine.ItemID
+            AND LastCostDate =
+                (SELECT LastCostDate
+                    FROM CostHistorySummary
+                    WHERE orderLine.ItemID = ItemID)) TotalCost,
+       (Price * Quantity) - Quantity *
+        (SELECT LastCost
+            FROM TblItemCostHistory costHistory
+            WHERE costHistory.ItemID = orderLine.ItemID
+            AND LastCostDate =
+                (SELECT LastCostDate
+                    FROM CostHistorySummary
+                    WHERE orderLine.ItemID = ItemID)) Profit
+FROM TblOrderLine orderLine;
 
+SELECT OrderID,
+       CONVERT(VARCHAR, OrderDate, 107) DateOrdered,
+       orders.CustomerID,
+       LastName,
+       FirstName,
+       (SELECT SUM(Profit)
+           FROM OrderLineProfit
+            WHERE OrderID = orders.OrderID
+           GROUP BY OrderID) OrderProfit
+FROM TblOrder orders
+INNER JOIN TblCustomer
+ON orders.CustomerID = TblCustomer.CustomerID;
 
 /* 10 */
+CREATE VIEW OrderProfit AS
+SELECT OrderID,
+       SUM(Profit) Profit
+FROM OrderLineProfit
+GROUP BY OrderID;
 
+SELECT orderLine.OrderID,
+       CONVERT(VARCHAR, OrderDate, 107) OrderDate,
+       FirstName + ' ' + LastName CustomerName,
+       orderLine.ItemID,
+       Description ItemDescription,
+       Quantity QtyOrdered,
+       Price ItemPrice,
+       (SELECT LastCost
+            FROM TblItemCostHistory costHistory
+            WHERE costHistory.ItemID = orderLine.ItemID
+            AND LastCostDate =
+                (SELECT LastCostDate
+                    FROM CostHistorySummary
+                    WHERE orderLine.ItemID = ItemID)) LastCostPaid,
+       Price - (SELECT LastCost
+                    FROM TblItemCostHistory costHistory
+                    WHERE costHistory.ItemID = orderLine.ItemID
+                    AND LastCostDate =
+                        (SELECT LastCostDate
+                            FROM CostHistorySummary
+                            WHERE orderLine.ItemID = ItemID)) DifferenceBetweenPriceAndCost,
+       Quantity * (Price - (SELECT LastCost
+                                FROM TblItemCostHistory costHistory
+                                WHERE costHistory.ItemID = orderLine.ItemID
+                                AND LastCostDate =
+                                    (SELECT LastCostDate
+                                        FROM CostHistorySummary
+                                        WHERE orderLine.ItemID = ItemID))) ExtendedDifference
+FROM TblOrderLine orderLine
+INNER JOIN TblOrder
+ON orderLine.OrderID = TblOrder.OrderID
+INNER JOIN TblCustomer
+ON TblOrder.CustomerID = TblCustomer.CustomerID
+INNER JOIN TblItem
+ON orderLine.ItemID = TblItem.ItemID
+WHERE orderLine.OrderID =
+      (SELECT OrderID
+          FROM OrderProfit
+          WHERE Profit =
+                (SELECT MAX(Profit)
+                    FROM OrderProfit));
 
 /* 11 */
+CREATE VIEW SalesInNv AS
+SELECT ItemID,
+       SUM(Quantity) QuantitySold
+FROM TblOrderLine
+INNER JOIN TblOrder
+ON TblOrderLine.OrderID = TblOrder.OrderID
+INNER JOIN TblCustomer
+ON TblOrder.CustomerID = TblCustomer.CustomerID
+WHERE State = 'NV'
+GROUP BY ItemID;
+
+SELECT ItemID,
+       Description ItemDescription,
+       (SELECT MAX(QuantitySold)
+           FROM SalesInNv) TotalQuantityOrdered,
+       (SELECT AveragePrice
+           FROM PriceHistorySummary
+           WHERE PriceHistorySummary.ItemID = items.ItemID) AveragePrice,
+       (SELECT LastCost
+            FROM TblItemCostHistory costHistory
+            WHERE costHistory.ItemID = items.ItemID
+            AND LastCostDate =
+                (SELECT LastCostDate
+                    FROM CostHistorySummary
+                    WHERE items.ItemID = ItemID)) LastCostPaid,
+       CONVERT(VARCHAR, (SELECT LastCostDate
+                    FROM CostHistorySummary
+                    WHERE items.ItemID = ItemID), 107) LastCostDate
+FROM TblItem items
+WHERE ItemID =
+      (SELECT ItemID
+          FROM SalesInNv
+          WHERE QuantitySold =
+                (SELECT MAX(QuantitySold)
+                    FROM SalesInNv));
